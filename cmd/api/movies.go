@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"greenlight.ducndh.net/internal/data"
+	"greenlight.ducndh.net/internal/validator"
 )
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,7 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 
 	v := validator.New()
 
-	if data.ValidateMovie(v, movie); !v.valid {
+	if data.ValidateMovie(v, movie); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
