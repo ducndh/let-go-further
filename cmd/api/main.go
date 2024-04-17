@@ -66,15 +66,7 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	tx, err := db.Begin(context.Background())
-
 	// Start the HTTP server.
-	query := `
-	DELETE FROM movies
-	WHERE id = 11`
-	result, err := tx.Query(context.Background(), query)
-	fmt.Println(result.Scan())
-	tx.Rollback(context.Background())
 	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
 	err = srv.ListenAndServe()
 	logger.Fatal(err)

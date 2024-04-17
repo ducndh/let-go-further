@@ -108,9 +108,15 @@ func (m MovieModel) Delete(id int64) error {
 	query := `
 		DELETE FROM movies
 		WHERE id = $1`
-	result, err := m.DB.Query(context.Background(), query, id)
-	if result != nil || err != nil {
+
+	result, err := m.DB.Exec(context.Background(), query, id)
+
+	if err != nil {
 		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrRecordNotFound
 	}
 
 	return nil
