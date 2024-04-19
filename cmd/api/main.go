@@ -11,6 +11,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"greenlight.ducndh.net/internal/data"
+	"greenlight.ducndh.net/internal/jsonlog"
 )
 
 const version = "1.0.0"
@@ -27,7 +28,7 @@ type config struct {
 
 type application struct {
 	config config
-	logger *log.Logger
+	logger *jsonlog.Logger
 	models data.Models
 }
 
@@ -43,15 +44,16 @@ func main() {
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
 	flag.Parse()
 
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+
 	db, err := openDB(cfg)
 	if err != nil {
-		os.Exit(1)
+		logger.PrintFatal(err, nil)
 	}
 	defer db.Close()
 
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger.PrintInfo("database connection pool established", nil)
 
-	logger.Printf("database connection pool established")
 	app := &application{
 		config: cfg,
 		logger: logger,
@@ -61,15 +63,19 @@ func main() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.routes(),
+		ErrorLog:     log.New(logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
 	// Start the HTTP server.
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": srv.Addr,
+		"env":  cfg.env,
+	})
 	err = srv.ListenAndServe()
-	logger.Fatal(err)
+	logger.PrintFatal(err, nil)
 }
 
 func openDB(cfg config) (*pgxpool.Pool, error) {
