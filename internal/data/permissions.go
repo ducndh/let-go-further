@@ -66,6 +66,6 @@ func (m PermissionModel) AddForUser(userID int64, codes ...string) error {
 	SELECT $1, permissions.id FROM permissions WHERE permissions.code = ANY($2)`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	_, err := m.DB.Query(ctx, query, userID, pq.Array(codes))
+	_, err := m.DB.Exec(ctx, query, userID, pq.Array(codes))
 	return err
 }

@@ -72,7 +72,7 @@ func (m TokenModel) Insert(token *Token) error {
 	args := []interface{}{token.Hash, token.UserID, token.Expiry, token.Scope}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	_, err := m.DB.Query(ctx, query, args...)
+	_, err := m.DB.Exec(ctx, query, args...)
 	return err
 }
 
@@ -82,6 +82,6 @@ func (m TokenModel) DeleteAllForUser(scope string, userID int64) error {
 	WHERE scope = $1 AND user_id = $2`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	_, err := m.DB.Query(ctx, query, scope, userID)
+	_, err := m.DB.Exec(ctx, query, scope, userID)
 	return err
 }
