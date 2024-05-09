@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 )
 
@@ -22,6 +23,7 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("PUT /v1/users/activated", app.activateUserHandler)
 
 	mux.HandleFunc("POST /v1/tokens/authentication", app.createAuthenticationTokenHandler)
+	mux.Handle("GET /debug/vars", expvar.Handler())
 
 	return app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(mux))))
 }
