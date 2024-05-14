@@ -24,7 +24,9 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("PUT /v1/users/password", app.updateUserPasswordHandler)
 
 	mux.HandleFunc("POST /v1/tokens/authentication", app.createAuthenticationTokenHandler)
+	mux.HandleFunc("POST /v1/tokens/activation", app.createActivationTokenHandler)
 	mux.HandleFunc("POST /v1/tokens/password-reset", app.createPasswordResetTokenHandler)
+
 	mux.Handle("GET /debug/vars", expvar.Handler())
 
 	return app.metrics(app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(mux)))))
